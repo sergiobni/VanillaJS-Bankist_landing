@@ -9,6 +9,10 @@ const btnCloseModal = document.querySelector('.btn--close-modal');
 const btnsOpenModal = document.querySelectorAll('.btn--show-modal');
 const btnScrollTo = document.querySelector('.btn--scroll-to');
 const secttion1 = document.querySelector('#section--1');
+const tabs = document.querySelectorAll('.operations__tab');
+const tabsContainer = document.querySelector('.operations__tab-container');
+const tabsContent = document.querySelectorAll('.operations__content');
+const nav = document.querySelector('.nav');
 
 const openModal = function (e) {
   e.preventDefault();
@@ -33,12 +37,11 @@ document.addEventListener('keydown', function (e) {
   }
 });
 
-/////Events listeners
-
 /////Page navigation
 
 ///Smooth scrolling with event delegation
 ///Nav bar buttons
+
 //1.Add event listener to common parent element
 //2. Determine what element originated the event
 document.querySelector('.nav__links').addEventListener('click', function (e) {
@@ -73,10 +76,6 @@ btnScrollTo.addEventListener('click', function (e) {
 
 /////Tabbed component
 
-const tabs = document.querySelectorAll('.operations__tab');
-const tabsContainer = document.querySelector('.operations__tab-container');
-const tabsContent = document.querySelectorAll('.operations__content');
-
 //bad practice, for each tab will be a copy, we need to use event delegation
 //tabs.forEach(t => t.addEventListener('click', () => console.log('tab')));
 
@@ -102,3 +101,45 @@ tabsContainer.addEventListener('click', function (e) {
     .querySelector(`.operations__content--${clicked.dataset.tab}`)
     .classList.add('operations__content--active');
 });
+
+/////Menu fade animation
+
+const handleHover = function (e) {
+  if (e.target.classList.contains('nav__link')) {
+    const link = e.target;
+    const siblings = link.closest('.nav').querySelectorAll('.nav__link');
+    const logo = link.closest('.nav').querySelector('img');
+
+    siblings.forEach(el => {
+      if (el !== link) el.style.opacity = this;
+    });
+    logo.style.opacity = this;
+  }
+};
+
+//Passing an "argument" into a handler
+nav.addEventListener('mouseover', handleHover.bind(0.5));
+nav.addEventListener('mouseout', handleHover.bind(1));
+
+/////Sticky navigation
+
+//Using intersection of server API for sticky navigation
+const header = document.querySelector('.header');
+//Calculating the heigh of the nav for the margin
+const navHeight = nav.getBoundingClientRect().height;
+
+//The callback function will get called every time the observed element is intersecting the root element at the threshold defined at the options
+const stickyNav = function (entries) {
+  const [entry] = entries;
+  console.log(entry);
+  //Adding classes
+  if (!entry.isIntersecting) nav.classList.add('sticky');
+  else nav.classList.remove('sticky');
+};
+
+const headerObserver = new IntersectionObserver(stickyNav, {
+  root: null, //entire viweport
+  threshold: 0, //When 0% of the header is visible
+  rootMargin: `-${navHeight}px`, //Margin for the header to appear before the section, so it doesnt cover up the section content
+});
+headerObserver.observe(header);
