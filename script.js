@@ -169,7 +169,7 @@ const sectionObserver = new IntersectionObserver(revealSection, {
 //Observe and Add hidden class to all sections
 allSections.forEach(function (section) {
   sectionObserver.observe(section);
-  //section.classList.add('section--hidden');
+  section.classList.add('section--hidden');
 });
 
 ///Lazy loading images
