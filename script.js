@@ -166,10 +166,10 @@ const sectionObserver = new IntersectionObserver(revealSection, {
   threshold: 0.15,
 });
 
-//Add hidden class to all sections
+//Observe and Add hidden class to all sections
 allSections.forEach(function (section) {
   sectionObserver.observe(section);
-  section.classList.add('section--hidden');
+  //section.classList.add('section--hidden');
 });
 
 ///Lazy loading images
@@ -200,3 +200,97 @@ const imgObserver = new IntersectionObserver(loadImg, {
 });
 //Observe each img selected
 imgTargets.forEach(img => imgObserver.observe(img));
+
+/////Slider
+
+const slider = function () {
+  const slides = document.querySelectorAll('.slide');
+  const btnLeft = document.querySelector('.slider__btn--left');
+  const btnRight = document.querySelector('.slider__btn--right');
+
+  let curSlide = 0;
+  const maxSlide = slides.length;
+
+  const dotContainer = document.querySelector('.dots');
+
+  ///Dots
+
+  const createDots = function () {
+    //For each of the slides create a dot
+    slides.forEach(function (_, i) {
+      dotContainer.insertAdjacentHTML(
+        'beforeend',
+        `<button class="dots__dot" data-slide="${i}"></button>`
+      );
+    });
+  };
+
+  const activateDot = function (slide) {
+    //Select all of the dots and deactivate active class
+    document
+      .querySelectorAll('.dots__dot')
+      .forEach(dot => dot.classList.remove('dots__dot--active'));
+
+    //Add active only to the desired slide
+    document
+      .querySelector(`.dots__dot[data-slide="${slide}"]`)
+      .classList.add('dots__dot--active');
+  };
+
+  //Putting all the slides side by side
+  //setting a style for each of the slides
+  slides.forEach((s, i) => (s.style.transform = `translateX(${100 * i}%)`));
+
+  //Refactoring of go to slide
+  const goToSlide = function (slide) {
+    slides.forEach(
+      (s, i) => (s.style.transform = `translateX(${100 * (i - slide)}%)`)
+    );
+  };
+
+  ///Next and Previous slide
+  const nextSlide = function () {
+    if (curSlide === maxSlide - 1) {
+      //Return to the beginning when last slide is slide
+      curSlide = 0;
+    } else {
+      curSlide++;
+    }
+    goToSlide(curSlide);
+    activateDot(curSlide);
+  };
+
+  const prevSlide = function () {
+    if (curSlide === 0) {
+      curSlide = maxSlide - 1;
+    } else curSlide--;
+    goToSlide(curSlide);
+    activateDot(curSlide);
+  };
+
+  const init = function () {
+    createDots();
+    goToSlide(0); //So by default the first dot is active
+    activateDot(curSlide);
+  };
+
+  init();
+
+  btnRight.addEventListener('click', nextSlide);
+  btnLeft.addEventListener('click', prevSlide);
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft') prevSlide();
+    e.key === 'ArrowRight' && nextSlide(); //Same, using short circuiting
+  });
+
+  dotContainer.addEventListener('click', function (e) {
+    if (e.target.classList.contains('dots__dot')) {
+      const { slide } = e.target.dataset;
+      goToSlide(slide);
+      activateDot(curSlide);
+    }
+  });
+};
+
+slider();
