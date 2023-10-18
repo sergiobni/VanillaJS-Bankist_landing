@@ -131,7 +131,7 @@ const navHeight = nav.getBoundingClientRect().height;
 //The callback function will get called every time the observed element is intersecting the root element at the threshold defined at the options
 const stickyNav = function (entries) {
   const [entry] = entries;
-  console.log(entry);
+  // console.log(entry);
   //Adding classes
   if (!entry.isIntersecting) nav.classList.add('sticky');
   else nav.classList.remove('sticky');
@@ -143,3 +143,60 @@ const headerObserver = new IntersectionObserver(stickyNav, {
   rootMargin: `-${navHeight}px`, //Margin for the header to appear before the section, so it doesnt cover up the section content
 });
 headerObserver.observe(header);
+
+//Reveal sections
+
+const allSections = document.querySelectorAll('.section');
+
+const revealSection = function (entries, observer) {
+  const [entry] = entries;
+  //console.log(entry);
+
+  //Guard, if is not intersecting do not remove, because it will be removing too early
+  if (!entry.isIntersecting) return;
+
+  //Targetting the entry so only the current secction gets hidden removed
+  entry.target.classList.remove('section--hidden');
+  //Unobserve when finished the animation, so the event doesn't keep triggering, better performance
+  observer.unobserve(entry.target);
+};
+
+const sectionObserver = new IntersectionObserver(revealSection, {
+  root: null,
+  threshold: 0.15,
+});
+
+//Add hidden class to all sections
+allSections.forEach(function (section) {
+  sectionObserver.observe(section);
+  section.classList.add('section--hidden');
+});
+
+///Lazy loading images
+
+//Selecting all the images that have data-src
+const imgTargets = document.querySelectorAll('img[data-src]');
+
+const loadImg = function (entries, observer) {
+  const [entry] = entries;
+  //console.log(entry);
+
+  if (!entry.isIntersecting) return;
+
+  //Replace src with data-src
+  entry.target.src = entry.target.dataset.src;
+
+  entry.target.addEventListener('load', function () {
+    entry.target.classList.remove('lazy-img');
+  });
+
+  observer.unobserve(entry.target);
+};
+
+const imgObserver = new IntersectionObserver(loadImg, {
+  root: null,
+  threshold: 0,
+  rootMargin: '200px', //Loading just before the showing
+});
+//Observe each img selected
+imgTargets.forEach(img => imgObserver.observe(img));
